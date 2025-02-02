@@ -1,282 +1,291 @@
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
   <title>SkillUncapped</title>
+  <style>
+    body {
+      background-color: #212121;
+      color: #EEDEB7;
+      font-family: 'Roboto', sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #2A2A2A;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 4px;
+      background: #333;
+      color: #EEDEB7;
+    }
+    .btn {
+      background-color: #0095ff;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .btn:hover {
+      background-color: #007acc;
+    }
+    video {
+      width: 90%;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+    a {
+      text-decoration: underline;
+      color: #0095ff;
+    }
+    .social {
+      display: flex;
+      justify-content: end;
+      align-items: end;
+      margin-top: 10px;
+    }
+    .tooltip {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .tooltip .tooltip-text {
+      visibility: hidden;
+      width: 300px;
+      background-color: #333;
+      color: #EEDEB7;
+      text-align: left;
+      padding: 10px;
+      border-radius: 5px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .tooltip:hover .tooltip-text,
+    .tooltip:focus-within .tooltip-text {
+      visibility: visible;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
-<label for="url">URL: </label>
-<input onkeyup="if (event.key =='Enter') stream()" style="width: 300px;" id="url"
-  placeholder="https://www.skill-capped.com/lol/commentaries/p1qcnwqt75" />
-<p></p>
-<button class="button-7" style="width: 80px;" onclick="stream()">Stream</button>
-<hr style="width:50%;text-align:left;margin-left:0">
-<div class="container mt-4">
-    <div class="form-group">
-        <label for="resolution">Select Resolution:</label>
-        <select id="resolution" class="form-control">
-            <option value="1500">720p</option>
-            <option value="2500">1080p</option>
-            <option value="4500">4k</option>
-            <!-- Add more resolution options as needed -->
-        </select>
+<body>
+  <div class="container">
+    <a href="https://www.skill-capped.com/lol/browse/course" target="_blank">League SkillCapped Courses</a>
+    <input id="url" placeholder="Enter video URL" onkeyup="if(event.key =='Enter') stream()" />
+    <button class="btn" onclick="stream()">Stream</button>
+    <hr>
+    <label for="resolution">Select Resolution:</label>
+    <select id="resolution">
+      <option value="1500">720p</option>
+      <option value="2500">1080p</option>
+      <option value="4500">4k</option>
+    </select>
+    <label for="videoName">Video Name:</label>
+    <input type="text" id="videoName" placeholder="Enter video name" />
+    <button class="btn" onclick="downloadAndMergeVideo()">Download</button>
+    <p id="status"></p>
+    
+    <div class="tooltip">
+      <button class="btn">Instructions</button>
+      <div class="tooltip-text">
+        <p>1. Please make sure Allow CORS extension is toggled on, then copy and paste the video link into the URL box.</p>
+        <p>2. Click Stream if you want to watch the video on a web browser.</p>
+        <p>3. If you want to download the video, select a resolution and enter a name for the video to be saved as. Then click the Download button. Wait up to a few minutes for the video to be processed.</p>
+      </div>
     </div>
-    <div class="form-group">
-        <label for="videoName">Video Name:</label>
-        <input type="text" id="videoName" class="form-control" placeholder="Enter video name (without extension)" />
-    </div>
-    <button class="button-42 btn btn-primary" onclick="downloadAndMergeVideo()">Download</button>
-</div>
-<p>1. Please make sure Allow CORS extension is toggle on, then copy and paste the video link to url box</p>
-<p>2. Click Stream if you want to watch the video on web browser</p>
-<p>3. If you want to download the video, select Resolution + enter a name for the video to be saved as. Then click Download button. Wait up to a few minutes for the video to be process</p>
-<p><a href="https://www.elitepvpers.com/forum/league-legends/5184577-method-stream-download-skillcapped-video-tested-working-2023-a.html">EPVP Thread</a>
-<label style="display: block;" id="status"></label>
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<video style="display: block; margin-top: 16px; margin-bottom: 16px;" height="720" width="1280" id="video" controls
-  autoplay crossorigin="anonymous" />
-
-<script>
-  var hls = null;
-
-  if (Hls.isSupported()) {
-    var hlsjsConfig = {
-      "maxBufferSize": 0,
-      "maxBufferLength": 30,
-      "startPosition": 0
+  </div>
+  <video id="video" controls autoplay></video>
+  <div class="social">
+    <a target="_blank" href="https://discordapp.com/users/1211289961333129236">Discord</a>
+  </div>
+  <script>
+    var hls = null;
+  
+    if (Hls.isSupported()) {
+      var hlsjsConfig = {
+        "maxBufferSize": 0,
+        "maxBufferLength": 30,
+        "startPosition": 0
+      }
+      hls = new Hls(hlsjsConfig);
+      hls.on(Hls.Events.MANIFEST_PARSED, function () {
+        video.play();
+      });
     }
-    hls = new Hls(hlsjsConfig);
-    hls.on(Hls.Events.MANIFEST_PARSED, function () {
-      video.play();
-    });
-  }
-
-  const rgx = /([a-z0-9]{10})(:?\/|$)/g;
-
-  async function stream() {
-    if (hls == null) {
-      alert("HLS not supported, please use a modern browser such as Chrome");
-      return;
-    }
-
-    let rawUrl = document.getElementById("url").value;
-    rawUrl = rawUrl.replace(/\/[^/]*$/, '');
-    let ids = [];
-    let match = null;
-
-    while ((match = rgx.exec(rawUrl)) !== null) {
-      ids.push(match[1]);
-    }
-
-    if (ids.length < 1) {
-      alert("Invalid URL");
-      return;
-    }
-
-    const videoId = rawUrl.includes("browse3") ? ids[0] : ids[ids.length - 1];
-    let statusLabel = document.getElementById("status");
-
-    console.log(`Video ID is ${videoId}`);
-    console.log("Looking for the final part...");
-    let last = 0;
-    let jump = true;
-
-    for (let i = 300; i <= 1000; i++) {
-      if (i == 1000) {
-        alert("Error finding the last part");
+  
+    const rgx = /([a-z0-9]{10})(:?\/|$)/g;
+  
+    async function stream() {
+      if (hls == null) {
+        alert("HLS not supported, please use a modern browser such as Chrome");
         return;
       }
-
-      if (i == 0) i = 1;
-
-      const url = `https://d13z5uuzt1wkbz.cloudfront.net/${videoId}/HIDDEN4500-${String(i).padStart(5, "0")}.ts`;
-      console.log(`Testing ${url}`);
-      statusLabel.innerText = `Looking for the final part; Testing ${i}...`;
-      try {
-        const resp = await fetch(url, { method: 'HEAD' });
-        if (resp.status === 403) {
-          if (i >= 50 && i % 50 === 0 && jump) {
-            last = i;
-            jump = true;
-            i -= 51;
-            continue;
-          }
-
-          break;
-        }
-        last = i;
-        jump = false;
-      } catch (e) {
-        alert("Fetch failed, please install a Cross-Origin disabler extension for your browser or check your internet connectivity.");
+  
+      let rawUrl = document.getElementById("url").value;
+      rawUrl = rawUrl.replace(/\/[^/]*$/, '');
+      let ids = [];
+      let match = null;
+  
+      while ((match = rgx.exec(rawUrl)) !== null) {
+        ids.push(match[1]);
+      }
+  
+      if (ids.length < 1) {
+        alert("Invalid URL");
         return;
       }
-    }
-
-    statusLabel.innerText = "";
-
-    let data = "#EXTM3U\n#EXT-X-PLAYLIST-TYPE:VOD\n#EXT-X-TARGETDURATION:10";
-    for (let i = 0; i <= last; i++) {
-      data += `#EXTINF:10,\nhttps://d13z5uuzt1wkbz.cloudfront.net/${videoId}/HIDDEN4500-${String(i).padStart(5, "0")}.ts\n`
-    }
-
-    console.log(data);
-
-    // Load the media for streaming
-    hls.loadSource("data:application/x-mpegURL;base64," + btoa(data));
-    hls.attachMedia(video);
-  }
-	async function downloadAndMergeVideo() {
-        const rawUrl = document.getElementById("url").value.replace(/\/[^/]*$/, '');
-        const selectedResolution = document.getElementById("resolution").value;
-        const videoName = document.getElementById("videoName").value;
-
-        if (!videoName) {
-            document.getElementById("status").innerText = "Please enter a video name.";
-            return;
+  
+      const videoId = rawUrl.includes("browse3") ? ids[0] : ids[ids.length - 1];
+      let statusLabel = document.getElementById("status");
+  
+      console.log(`Video ID is ${videoId}`);
+      console.log("Looking for the final part...");
+      let last = 0;
+      let jump = true;
+  
+      for (let i = 300; i <= 1000; i++) {
+        if (i == 1000) {
+          alert("Error finding the last part");
+          return;
         }
-
-        let ids = [];
-        let match = null;
-
-        while ((match = rgx.exec(rawUrl))) {
-            ids.push(match[1]);
-        }
-
-        if (ids.length < 1) {
-            document.getElementById("status").innerText = "PLS INSERT LINK AND DOWNLOAD";
-            return;
-        }
-
-        const videoId = rawUrl.includes("browse3") ? ids[0] : ids[ids.length - 1];
-
-        // Determine the last .ts file index (adjust the range as needed)
-        const lastFileIndex = 1000; // Assuming the last .ts file index is 1000, adjust as needed
-
-        // Create an array to hold the URLs of all .ts files
-        const tsUrls = [];
-
-        // Generate download links for all .ts files and collect their URLs
-        for (let i = 1; i <= lastFileIndex; i++) {
-            const tsUrl = `https://d13z5uuzt1wkbz.cloudfront.net/${videoId}/HIDDEN${selectedResolution}-${String(i).padStart(5, "0")}.ts`;
-            tsUrls.push(tsUrl);
-        }
-
-        // Reset status to "IN PROGRESS"
-        document.getElementById("status").innerText = "IN PROGRESS";
-
-        // Download all .ts files and store their content in an array
-        const tsFileContents = [];
-
-        for (const [index, tsUrl] of tsUrls.entries()) {
-            try {
-                const resp = await fetch(tsUrl);
-                if (resp.status === 200) {
-                    const tsData = await resp.arrayBuffer();
-                    tsFileContents.push(tsData);
-                } else {
-                    console.warn(`Failed to download ${tsUrl}, finishing download.`);
-                    break; // Stop downloading if any error occurs
-                }
-            } catch (e) {
-                console.warn(`Fetch failed for ${tsUrl}, finishing download.`);
-                break; // Stop downloading if any error occurs
+  
+        if (i == 0) i = 1;
+  
+        const url = `https://d13z5uuzt1wkbz.cloudfront.net/${videoId}/HIDDEN4500-${String(i).padStart(5, "0")}.ts`;
+        console.log(`Testing ${url}`);
+        statusLabel.innerText = `Looking for the final part; Testing ${i}...`;
+        try {
+          const resp = await fetch(url, { method: 'HEAD' });
+          if (resp.status === 403) {
+            if (i >= 50 && i % 50 === 0 && jump) {
+              last = i;
+              jump = true;
+              i -= 51;
+              continue;
             }
+  
+            break;
+          }
+          last = i;
+          jump = false;
+        } catch (e) {
+          alert("Fetch failed, please install a Cross-Origin disabler extension for your browser or check your internet connectivity.");
+          return;
         }
-
-        if (tsFileContents.length === 0) {
-            document.getElementById("status").innerText = "No valid .ts files were downloaded.";
-            return;
-        }
-
-        // Merge all the .ts files into a single video using FFmpeg
-        const mergedVideoBlob = new Blob(tsFileContents, { type: 'video/mp2t' });
-
-        // Create a download link for the merged video
-        const downloadLink = document.createElement('a');
-        downloadLink.href = URL.createObjectURL(mergedVideoBlob);
-        downloadLink.download = `${videoName}.ts`; // Use the specified video name
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-
-        // Display "DONE" with a pop-out animation
-        document.getElementById("status").innerText = "DONE";
-        setTimeout(() => {
-            document.getElementById("status").innerText = ""; // Clear status
-        }, 1000);
+      }
+  
+      statusLabel.innerText = "";
+  
+      let data = "#EXTM3U\n#EXT-X-PLAYLIST-TYPE:VOD\n#EXT-X-TARGETDURATION:10";
+      for (let i = 0; i <= last; i++) {
+        data += `#EXTINF:10,\nhttps://d13z5uuzt1wkbz.cloudfront.net/${videoId}/HIDDEN4500-${String(i).padStart(5, "0")}.ts\n`
+      }
+  
+      console.log(data);
+  
+      // Load the media for streaming
+      hls.loadSource("data:application/x-mpegURL;base64," + btoa(data));
+      hls.attachMedia(video);
     }
-</script>
+    async function downloadAndMergeVideo() {
+          const rawUrl = document.getElementById("url").value.replace(/\/[^/]*$/, '');
+          const selectedResolution = document.getElementById("resolution").value;
+          const videoName = document.getElementById("videoName").value;
+  
+          if (!videoName) {
+              document.getElementById("status").innerText = "Please enter a video name.";
+              return;
+          }
+  
+          let ids = [];
+          let match = null;
+  
+          while ((match = rgx.exec(rawUrl))) {
+              ids.push(match[1]);
+          }
+  
+          if (ids.length < 1) {
+              document.getElementById("status").innerText = "PLS INSERT LINK AND DOWNLOAD";
+              return;
+          }
+  
+          const videoId = rawUrl.includes("browse3") ? ids[0] : ids[ids.length - 1];
+  
+          // Determine the last .ts file index (adjust the range as needed)
+          const lastFileIndex = 1000; // Assuming the last .ts file index is 1000, adjust as needed
+  
+          // Create an array to hold the URLs of all .ts files
+          const tsUrls = [];
+  
+          // Generate download links for all .ts files and collect their URLs
+          for (let i = 1; i <= lastFileIndex; i++) {
+              const tsUrl = `https://d13z5uuzt1wkbz.cloudfront.net/${videoId}/HIDDEN${selectedResolution}-${String(i).padStart(5, "0")}.ts`;
+              tsUrls.push(tsUrl);
+          }
+  
+          // Reset status to "IN PROGRESS"
+          document.getElementById("status").innerText = "IN PROGRESS";
+  
+          // Download all .ts files and store their content in an array
+          const tsFileContents = [];
+  
+          for (const [index, tsUrl] of tsUrls.entries()) {
+              try {
+                  const resp = await fetch(tsUrl);
+                  if (resp.status === 200) {
+                      const tsData = await resp.arrayBuffer();
+                      tsFileContents.push(tsData);
+                  } else {
+                      console.warn(`Failed to download ${tsUrl}, finishing download.`);
+                      break; // Stop downloading if any error occurs
+                  }
+              } catch (e) {
+                  console.warn(`Fetch failed for ${tsUrl}, finishing download.`);
+                  break; // Stop downloading if any error occurs
+              }
+          }
+  
+          if (tsFileContents.length === 0) {
+              document.getElementById("status").innerText = "No valid .ts files were downloaded.";
+              return;
+          }
+  
+          // Merge all the .ts files into a single video using FFmpeg
+          const mergedVideoBlob = new Blob(tsFileContents, { type: 'video/mp2t' });
+  
+          // Create a download link for the merged video
+          const downloadLink = document.createElement('a');
+          downloadLink.href = URL.createObjectURL(mergedVideoBlob);
+          downloadLink.download = `${videoName}.ts`; // Use the specified video name
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+          document.body.removeChild(downloadLink);
+  
+          // Display "DONE" with a pop-out animation
+          document.getElementById("status").innerText = "DONE";
+          setTimeout(() => {
+              document.getElementById("status").innerText = ""; // Clear status
+          }, 1000);
+      }
+  </script>
 </body>
-<style>
-.button-7 {
-  background-color: #0095ff;
-  border: 1px solid transparent;
-  border-radius: 3px;
-  box-shadow: rgba(255, 255, 255, .4) 0 1px 0 0 inset;
-  box-sizing: border-box;
-  color: #fff;
-  cursor: pointer;
-  display: inline-block;
-  font-family: -apple-system,system-ui,"Segoe UI","Liberation Sans",sans-serif;
-  font-size: 13px;
-  font-weight: 400;
-  line-height: 1.15385;
-  margin: 0;
-  outline: none;
-  padding: 8px .8em;
-  position: relative;
-  text-align: center;
-  text-decoration: none;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-  vertical-align: baseline;
-  white-space: nowrap;
-}
-
-.button-7:hover,
-.button-7:focus {
-  background-color: #07c;
-}
-
-.button-7:focus {
-  box-shadow: 0 0 0 4px rgba(0, 149, 255, .15);
-}
-
-.button-7:active {
-  background-color: #0064bd;
-  box-shadow: none;
-}
-
-.button-42 {
-  background-color: initial;
-  background-image: linear-gradient(-180deg, #FF7E31, #E62C03);
-  border-radius: 6px;
-  box-shadow: rgba(0, 0, 0, 0.1) 0 2px 4px;
-  color: #FFFFFF;
-  cursor: pointer;
-  display: inline-block;
-  font-family: Inter,-apple-system,system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
-  height: 40px;
-  line-height: 40px;
-  outline: 0;
-  overflow: hidden;
-  padding: 0 20px;
-  pointer-events: auto;
-  position: relative;
-  text-align: center;
-  touch-action: manipulation;
-  user-select: none;
-  -webkit-user-select: none;
-  vertical-align: top;
-  white-space: nowrap;
-  z-index: 9;
-  border: 0;
-  transition: box-shadow .2s;
-}
-
-.button-42:hover {
-  box-shadow: rgba(253, 76, 0, 0.5) 0 3px 8px;
-}
-</style>
 </html>
